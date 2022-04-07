@@ -1,0 +1,17 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+int main()
+{
+	int n = 0;
+	int sum = 0;
+	int ret = 1;
+	scanf_s("%d", &n);
+	for (sum = 1; sum <= n; sum++)  //《——————(大致的计算思路为n手动输入，计算从1乘到n的数值，最后用ret接收)
+	{
+
+		ret = sum * ret;
+	}
+	printf("阶乘=%d", ret);
+
+	return 0;
+}
