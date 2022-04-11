@@ -1,0 +1,81 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+#include<windows.h>
+#include<stdlib.h>
+#include<time.h>
+void start()
+{
+	printf("\n\n\n   **************************************************\n");
+	printf("   **************************************************\n");
+	printf("   ************これはデジタルゲームです**************\n");
+	printf("   **************************************************\n");
+	printf("   **************************************************\n");
+	Sleep(3000);
+	system("cls");
+	printf("\a");
+}
+void menu()
+{
+	printf("\n\n\n   ************************\n");
+	printf("   ************************\n");
+	printf("   ***1.play     2.sign out  ***\n");
+	printf("   ************************\n");
+	printf("   ************************\n");
+}
+void game()
+{
+	int a=rand()%100+1;
+	int guess = 0;
+	
+	while (1)
+	{
+		printf("  入力の数字は");
+		scanf("%d", &guess);
+		Sleep(1000);
+		system("cls");
+		if (guess == a)
+		{
+			printf("\n\n    当たってました!\n\n");
+			printf("     数字は%dです\n", a);
+			Sleep(4000);
+			system("cls");
+			break;
+		}
+		if (guess > a)
+		{
+			printf("\n\n大きな\n\n\a");
+		}
+		else if (guess < a)
+		{
+			printf("\n\n小さいな\n\n\a");
+		}
+		
+	}
+}
+int main()
+{
+	srand((unsigned int)time(NULL));
+	start();
+	int i = 0;
+	while (1)
+	{
+		menu();
+		scanf("%d", &i);
+		system("cls");
+		printf("  Guessの数字を入力してください(1-100)\n\n\a");
+		if (1 == i)
+		{
+			game();
+		}
+		else if (2 == i)
+		{
+			break;
+		}
+		else
+		{
+			printf("もう一度選んでください\n");
+			
+		}
+	}
+	return 0;
+}
