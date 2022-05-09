@@ -1,0 +1,115 @@
+#include<stdio.h>
+#include<unistd.h>
+void start()
+{
+    printf("******************************\n");
+    printf("*****1.十进制转换为二进制*****\n");
+    printf("*****2.二进制转换为十进制*****\n");
+    printf("******************************\n");
+}
+int qwe()//10转2
+{
+        int n=0;
+    scanf("%d",&n);
+    int e=1;
+    int sum=0;
+    
+    int h=0;
+    while(n!=0)
+    {
+        sum=n%2;
+        int sum2=e*sum;
+        h+=sum2;
+        e*=10;
+        n=n/2;
+    }
+    printf("结果:%d\n\n",h);
+    return 0;
+}
+int sdd(int n,int i)//计算次方数
+{
+    int sum=1;
+    int m=0;
+    for(m=1;m<=i;m++)
+    {
+        sum*=n;
+    }
+    return sum;
+}
+int asd()//2转10
+{
+    int a=0;
+    scanf("%d",&a);
+    int x=0;
+    int m=0;
+    int add=0;
+    int sum=0;
+    while(a!=0)
+    {
+        m=a%10;
+        add=sdd(2,x)*m;
+        sum+=add;
+        a/=10;
+        x++;
+    }
+    printf("结果:%d\n\n",sum);
+    return 0;
+}
+int main()
+{
+    
+    
+    while(1)
+    {
+        start();
+        int i=0;
+    scanf("%d",&i);
+    printf("\033c");
+        if(1==i)
+        {
+            here1:
+            printf("十进制转化成二进制\n");
+            printf("入力の数字:");
+            qwe();
+            printf("(输入0以继续)\n");
+            printf("(输入其他退出)\n");
+            int h=0;
+            scanf("%d",&h);
+            printf("\033c");
+            if(h==0)
+            {
+                goto here1;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if(2==i)
+        {
+            here2:
+            printf("二进制转化成十进制\n");
+            printf("入力の数字:");
+            asd();
+            printf("(输入0以继续)\n");
+            printf("(输入其他退出)\n");
+            int h=0;
+            scanf("%d",&h);
+            printf("\033c");
+            if(h==0)
+            {
+                goto here2;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else
+        {
+            printf("もう一度やり直してください\n");
+            
+        }
+    }
+    return 0;
+}
