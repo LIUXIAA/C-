@@ -1,0 +1,26 @@
+#include<stdio.h>
+int main()
+{
+    int a, b, c = 0;
+    scanf_s("%d%d%d", &a, &b, &c);
+    if (c > b)
+    {
+        int i = c;
+        c = b;
+        b = i;
+    }
+    if (c > a)
+    {
+        int i = c;
+        c = a;
+        a = i;
+    }
+    if (b > a)
+    {
+        int i = b;
+        b = a;
+        a = i;
+    }
+    printf("%d>%d>%d\n", a, b, c);
+    return 0;
+}
