@@ -1,0 +1,15 @@
+#include<stdio.h>
+int main()
+{
+    int a,b,c=0;
+    scanf("%d%d",&a,&b);
+    printf("\033c");
+    c=(a<b)?a:b;
+    for(c;a%c!=0||b%c!=0;c--)
+    {
+        NULL;
+    }
+    printf("%dと%dの最大約数は%dです。",a,b,c);
+    
+    return 0;
+}
