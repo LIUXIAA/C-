@@ -1,0 +1,24 @@
+#include<stdio.h>
+int main()
+{
+    int a,b,c=0;
+    int n=0;
+    scanf("%d%d%d",&a,&b,&c);
+    printf("\033c");
+    n=c;
+    if(c>b)
+    {
+        n=b;
+    }
+    else if(c>a)
+    {
+        n=a;
+    }
+    for(n;a%n!=0||b%n!=0||c%n!=0;n--)
+    {
+        NULL;
+    }
+    printf("%dと%dと%dの最大約数は%dです。",a,b,c,n);
+    
+    return 0;
+}
