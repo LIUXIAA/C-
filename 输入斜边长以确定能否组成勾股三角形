@@ -1,0 +1,45 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+int main()
+{
+	printf("斜辺の長さを入力してください\n\n");
+	int a2 = 0;
+	int b2 = 0;
+	int c = 0;
+	scanf("%d", &c);
+	int c2 = c * c;
+	for (a2 = 1; a2 < c2; a2++)
+	{
+		for (b2 = 1; b2 < c2; b2++)
+		{
+			if (a2 + b2 == c2)
+			{
+				int m, n = 0;
+				for (m = 1, n = 1; m < a2, n < a2; m++, n++)
+				{
+					if (m * n == a2)
+					{
+						printf("直角辺１は%dです。\n\n", m);
+						goto here;
+					}
+				}
+				break;
+				here:
+				int q, w = 0;
+				for (q = 1, w = 1; q < b2, w < b2;q++,w++)
+				{
+					if (q * w == b2)
+					{
+						printf("直角辺２は%dです。\n\n",q);
+						printf("斜辺長さは%dでピタグラス三角を構造できます。\n", c);
+						goto shere;
+					}
+				}
+				printf("\033c");
+			}
+		}
+	}
+	printf("斜辺長さは%dでピタグラス三角を構造できません。\n",c);
+	shere:
+		return 0;
+}
