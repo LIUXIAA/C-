@@ -1,0 +1,20 @@
+#include<stdio.h>
+int main()
+{
+    int i;
+    printf("数字を入力してください");
+    scanf("%d",&i);
+    printf("\033c");
+    int n=0;
+    int a[i];
+    for(int n=0;n<i;n++)
+    {
+        scanf("%d",&a[n]);
+    }
+    printf("\033c");
+    for(int q=0;q<i;q++)
+    {
+      printf("a[%d]=%d\n",q,a[q]);  
+    }
+    return 0;
+}
