@@ -1,0 +1,56 @@
+#include<stdio.h>
+int main()
+{
+    int sum1=3;
+    int sum2=5;
+    int se,o,op=0;
+    int q=0;
+    printf("请输入学生数量\n");
+    scanf("%d",&q);
+    printf("\033c");
+    int a,b,c,a1,b1,c1=0;
+    for(int i=1;i<=3;i++)
+    {
+        o=0;
+        if(i==1)
+        {
+            printf("请输入数学成绩\n");
+        }
+        if(i==2)
+        {
+            printf("请输入语文成绩\n");
+        }if(i==3)
+        {
+            printf("请输入英语成绩\n");
+        }
+        for(int n=1;n<=q;n++)
+        {
+            scanf("%d",&se);
+            o+=se;
+        }
+        op++;
+        if(op==1)
+        {
+            a=o/5;
+            a1=q;
+        }
+        if(op==2)
+        {
+            b=o/q;
+            b1=o;
+        }
+        if(op==3)
+        {
+            c=o/q;
+            c1=o;
+        }
+        printf("\033c");
+    }
+    printf("数学成绩平均分是%d。\n",a);
+    printf("数学成绩合計是%d。\n\n",a1);
+    printf("语文成绩平均分是%d。\n",b);
+    printf("语文成绩合計是%d。\n\n",b1);
+    printf("英语成绩平均分是%d。\n",c);
+    printf("英语成绩合計是%d。\n",c1);
+    return 0;
+}
