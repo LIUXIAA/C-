@@ -1,0 +1,39 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+#include<time.h>
+int main()
+{
+   printf("请输入n个你想排列的随机数\n");
+   int u=0;
+   scanf("%d",&u);
+   srand((unsigned int)time(NULL));
+   int i=0;
+   int a[10*100]={0};
+   for(int n=0;n<=u;n++)
+   {
+     int ret = rand()%100+1;
+     a[n]=ret;
+   }
+   
+   for(int y=1;y<=u-1;y++)
+   {
+   int q=0;
+   for(int o=1;o<=u-1;o++)
+   {
+   if(a[q]>a[q+1])
+   {
+      int u=a[q+1];
+      a[q+1]=a[q];
+      a[q]=u;
+   }
+   q++;
+   }
+   
+   }
+   
+   for(int p=0;p<u;p++)
+   {
+      printf("%d ",a[p]);
+   }
+   return 0;
+}
