@@ -1,0 +1,33 @@
+#include<stdio.h>
+//求第n个斐波那契的数字
+int fan1(int n)
+{
+   int a=1;
+   int b=1;
+   int c=0;
+   if(n>=3)
+   {
+   for(int i=1;i<=n-2;i++)
+   {
+      c=a+b;
+      a=b;
+      b=c;
+   }
+   }
+   else if(n<3||n>0)
+   {
+      c=1;
+   }
+   return c;
+}
+int main()
+{
+   
+   int n=0;
+   scanf("%d",&n);
+   printf("\033c");
+   int ret=0;
+   ret=fan1(n);
+   printf("第个%d斐波那契数字是%d",n,ret);
+   return 0;
+}
