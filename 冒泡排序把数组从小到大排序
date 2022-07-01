@@ -1,0 +1,36 @@
+#include<stdio.h>
+void sun(int sz,int a[])
+{
+   //sz
+   //a[0]  a[1]
+   for(int u=1;u<10;u++)
+   {
+   int n=0;
+   for(int i=0;i<sz-u;i++)
+   {
+   if(a[n]>a[n+1])
+   {
+      int z=a[n];
+      a[n]=a[n+1];
+      a[n+1]=z;
+   }
+   n++;
+   }
+   }
+}
+int main()
+{
+   int a[10]={5,4,3,1,8,9,10,2,6,7};
+   for(int q=0;q<=9;q++)
+   {
+      printf("%d  ",a[q]);
+   }
+   printf("\n");
+   int sz=sizeof(a)/sizeof(a[0]);
+   sun(sz,a);
+   for(int i=0;i<=9;i++)
+   {
+      printf("%d  ",a[i]);
+   }
+   return 0;
+}
