@@ -1,0 +1,35 @@
+#include<stdio.h>
+int main()
+{
+    int a[1000]={};
+    printf("请输入数据个数。(最大1000个)\n");
+    int n=0;
+    scanf("%d",&n);
+    printf("\033c");
+    printf("请输入数值\n");
+    for(int i=0;i<n;i++)
+    {
+        scanf("%d",&a[i]);
+    }
+    printf("\033c");
+    for(int i=0;i<n;i++)
+    {
+        int kay=a[i];
+        int q=i;
+        while((q-1>=0)&&(a[q-1]>kay))
+        {
+            a[q]=a[q-1];
+            q--;
+        }
+        if(q!=i)
+        {
+            a[q]=kay;
+        }
+    }
+    for(int i=0;i<n;i++)
+    {
+        printf("%d ",a[i]);
+    }
+    
+    return 0;
+}
