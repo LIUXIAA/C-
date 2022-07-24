@@ -1,0 +1,91 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include"game.h"
+void menu()
+{
+	printf("************************\n");
+	printf("*1.start*********2.over*\n");
+	printf("************************\n");
+}
+void game()
+{
+	srand((unsigned int)time(NULL));
+	char ret = 0;
+	char board[ROW][COL] = { 0 };
+	intboard(board, ROW, COL);
+	while (1)
+	{
+		int sum = 2;
+		printf("paly move\n");
+		playmove(board, ROW, COL);
+		displayboard(board, ROW, COL);
+		ret = iswin(board,ROW,COL);
+		if (ret != 'C')
+		{
+			printf("\033c");
+			break;
+		}
+		for (int i = 0; i < 2; i++)
+		{
+			printf("待ってください(%d)\n",sum);
+			Sleep(1000);
+			printf("\033c");
+			sum--;
+		}
+		
+		printf("pcmove\n");
+		pcmove(board, ROW, COL);
+		sum = 2;
+		for (int i = 0; i < 2; i++)
+		{
+			printf("待ってください(%d)\n",sum);
+			Sleep(1000);
+			printf("\033c");
+			sum--;
+		}
+		printf("\033c");
+		displayboard(board, ROW, COL);
+		ret = iswin(board, ROW, COL);
+		if (ret != 'C')
+		{
+			printf("\033c");
+			break;
+		}
+	}
+	if (ret == '*')
+	{
+		printf("play win\n");
+	}
+	else if (ret == '#')
+	{
+		printf("pc win\n");
+	}
+	else
+	{
+		printf("平局\n");
+	}
+}
+int main()
+{
+	menu();
+	int i = 0;
+	while (1)
+	{
+		printf("入力してください\n");
+		scanf("%d", &i);
+		if (i == 1)
+		{
+			game();
+			break;
+		}
+		else if (i == 2)
+		{
+			printf("over\n");
+			break;
+		}
+		else
+		{
+			printf("エラー\n");
+		}
+	}
+	return 0;
+}
