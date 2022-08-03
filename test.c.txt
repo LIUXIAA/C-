@@ -1,0 +1,47 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include"game.h"
+void menu()
+{
+	printf("************************\n");
+	printf("*1.start*********2.over*\n");
+	printf("************************\n");
+}
+void game()
+{
+	srand((unsigned int)time(NULL));
+	char mine[ROWS][COLS] = { 0 };//布置好的雷的信息
+	char show[ROWS][COLS] = { 0 };//排查出雷的信息
+	intboard(mine, ROWS, COLS,'0');
+	intboard(show, ROWS, COLS, '*');
+	//displayboard(mine, ROW, COL);
+	displayboard(show, ROW, COL);
+	//布置雷
+	setmine(mine, ROW, COL);
+	//displayboard(mine, ROW, COL);//开局作弊用
+	findmine(mine, show, ROW, COL);
+}
+int main()
+{
+	menu();
+	int i = 0;
+	while (1)
+	{
+		printf("入力してください\n");
+		scanf("%d", &i);
+		if (i == 1)
+		{
+			game();
+			break;
+		}
+		else if (i == 2)
+		{
+			printf("over\n");
+			break;
+		}
+		else
+		{
+			printf("エラー\n");
+		}
+	}
+	return 0;
+}
