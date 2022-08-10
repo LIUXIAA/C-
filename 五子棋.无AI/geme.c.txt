@@ -1,0 +1,235 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include"game.h"
+void intboard(char board[ROW][COL], int row, int col)
+{
+	int i = 0; int j = 0;
+	for (i = 0; i < row; i++)
+	{
+		for (j = 0; j < col; j++)
+		{
+			board[i][j] = ' ';
+		}
+	}
+}
+void displayboard(char board[ROW][COL], int row, int col)
+{
+	char a[] = { "○" };//*
+	char b[] = { "●" };//#
+	int sum = 1;
+	int sun1 = 1;
+	//┏━┯━┯━┯━┯━┯━┯━┯━┯━┯━┓
+	//┃  │　│　│　│　│　│　│　│　│　┃
+	//┗━●
+	for (int i = 0; i < col - 1; i++)
+	{
+		if (i == 0)
+		{
+			printf("      %d   ", sun1);
+			sun1++;
+		}
+		printf("%d   ", sun1);
+		sun1++;
+	}
+	printf("\n");
+	for (int i = 0; i < row - 1; i++)
+	{
+		if (i == 0)
+		{
+			printf("  ┏━━━");
+		}
+		//printf("123");
+		printf("┯━━━");
+		if (i == row - 2)
+		{
+			printf("┯━━━┓");
+		}
+	}
+	printf("\n");
+	for (int i = 0; i < row - 1; i++)
+	{
+		if (i == 0)
+		{
+			printf("  ┃   │");
+		}
+		printf("　 │");
+		if (i == row - 2)
+		{
+			printf("　 ┃");
+		}
+	}
+	printf("\n");
+	for (int j = 0; j <= col; j++)
+	{
+		if (j == col)
+		{
+			for (int i = 0; i < row; i++)
+			{
+				if (i == 0)
+				{
+					printf("  ┗━━━");
+				}
+				printf("┷━━━");
+				if (i == row - 1)
+				{
+					printf("┛");
+
+				}
+			}
+			break;
+		}
+		for (int i = 0; i < col ; i++)
+		{
+			if (i == 0)
+			{
+				printf("%2d", sum);
+				printf("┠━━-");
+			}
+				if (board[j][i] == '*')
+				{
+					if (i == col - 1)
+					{
+						printf("%s━━", a);
+						goto here;
+					}
+					printf("%s━-", a);
+				}
+				if (board[j][i] == '#')
+				{
+					if (i == col - 1)
+					{
+						printf("%s━━",b);
+						goto here;
+					}
+					printf("%s━-", b);
+				}
+				if (board[j][i] == ' ')
+				{
+					if (i == col - 1)
+					{
+						printf("%c━━━", board[j][i]);
+						goto here;
+					}
+					printf("%c━━-", board[j][i]);
+				}
+				here:
+			if (i == col  -1)
+			{
+				printf("┨");
+				printf(" %d", sum);
+			}
+		}
+		sum++;
+		printf("\n");
+		for (int i = 0; i < row - 1; i++)
+		{
+			if (i == 0)
+			{
+				printf("  ┃   │");
+			}
+			printf("　 │");
+			if (i == row - 2)
+			{
+				printf("　 ┃");
+			}
+		}
+		printf("\n");
+	}
+	printf("\n");
+	int sun2 = 1;
+	for (int i = 0; i < col - 1; i++)
+	{
+		if (i == 0)
+		{
+			printf("      %d   ", sun2);
+			sun2++;
+		}
+		printf("%d   ", sun2);
+		sun2++;
+	}
+	printf("\n");
+}
+void playmove(char board[ROW][COL], int row, int col)
+{
+	int x = 0;
+	int y = 0;
+	while (1)
+	{
+		scanf("%d%d", &x, &y);
+
+
+		if (x <= row && x >= 1 && y <= col && y >= 1 && board[x - 1][y - 1] == ' ')
+		{
+			board[x - 1][y - 1] = '*';
+			break;
+		}
+		else
+		{
+			printf("超出预期，重新输入");
+		}
+
+	}
+}
+void pcmove(char board[ROW][COL], int row, int col)
+{
+
+	while (1)
+	{
+		int x = rand() % row;
+		int y = rand() % col;
+		if (board[x][y] == ' ')
+		{
+			board[x][y] = '#';
+			break;
+		}
+		else
+		{
+
+		}
+	}
+}
+/*int isfull(char board[ROW][COL], int row, int col)
+{
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+			if (board[i][j] == ' ')
+			{
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+*/
+char iswin(char board[ROW][COL], int row, int col)
+{
+	int i = 0;
+	int j = 0;
+	for (i = 0; i < 10; i++)
+	{
+		for (j = 0; j < 10; j++)
+		{
+			if (board[i][j] != ' ')
+			{
+				if (board[i][j] == board[i][j + 1] && board[i][j + 1] == board[i][j + 2] && board[i][j + 2] == board[i][j + 3] && board[i][j + 3] == board[i][j + 4] && j >= 0 && j <= 9)
+				{
+					return board[i][j];
+				}
+				if (board[i][j] == board[i + 1][j] && board[i + 1][j] == board[i + 2][j] && board[i + 2][j] == board[i + 3][j] && board[i + 3][j] == board[i + 4][j] && i >= 0 && i <= 9)
+				{
+					return board[i][j];
+				}
+				if (board[i][j] == board[i + 1][j + 1] && board[i + 1][j + 1] == board[i + 2][j + 2] && board[i + 2][j + 2] == board[i + 3][j + 3] && board[i + 3][j + 3] == board[i + 4][j + 4] && i >= 0 && i <= 9 && j >= 0 && j <= 9)
+				{
+					return board[i][j];
+				}
+				if (board[i][j] == board[i + 1][j - 1] && board[i + 1][j - 1] == board[i + 2][j - 2] && board[i + 2][j - 2] == board[i + 3][j - 3] && board[i + 3][j - 3] == board[i + 4][j - 4] && i >= 0 && i <= 9 && j >= 0 && j <= 9)
+				{
+					return board[i][j];
+				}
+			}
+		}
+	}
+	return 'C';
+}
