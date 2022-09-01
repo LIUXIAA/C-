@@ -1,0 +1,807 @@
+#include<stdio.h>
+#include<math.h>
+#include<time.h>
+#include<easyx.h>
+#include<graphics.h>
+#include<mmsystem.h>
+#pragma comment(lib,"winmm.lib")
+#define whight 1400
+#define high 800
+#define images 22
+#define sum 15//最大物品数量
+#define PI 3.1415926535898
+#define max_angle 90//钩子摆幅最大角度
+struct sole//角色信息
+{
+	int x;//贴图位置
+	int y;
+	int wight;//图片宽高
+	int hight;
+	int coin;//金钱
+	int zha;
+	int uio;//接收目标分数
+	int un;//判断是否使用了炸药，0未使用，1使用了
+	int hp;//人物血量
+	int ooo;//药水有无
+	int oo;// 输出药水数目
+	int p;
+}sole;
+struct Mine//物品
+{
+	int x;
+	int y;
+	int size;//边界判断
+	bool flag;//是否存在
+	int type;//物品类型,石头，金块，钱袋
+	int gold;//物品价值
+}Mine[sum];
+struct Hook//钩子
+{
+	int x;
+	int y;
+	int endx;
+	int endy;
+	int len;//长度
+	int angle;//角度
+	int dir;//钩子方向
+	int vx;
+	int vy;//速度分量
+	int state;//钩子实时状态
+	int index;//记录抓到物品下标
+	int qwe;//判断绳子的收缩状态
+}hook;
+IMAGE img[images];
+int distance(Hook hook);
+enum MINE//枚举图片数组下标
+{
+	i_gold = 1,
+	i_money = 3,
+	i_soledown = 5,
+	i_soleup = 7,
+	i_stone = 9,
+	i_go = 11,
+	i_zuan = 13,
+	i_zha = 15,
+	i_gold1 = 17,
+	i_tong = 19,
+	i_bk = images - 1,
+	LEFT,//钩子的左和右
+	RIGHT,
+	//状态，正常，伸长，缩短
+	M_nomal,
+	M_long,
+	M_longD,
+	M_short,
+	M_shortD,
+	M_shortX,
+	M_shortZ,//使用炸弹后绳子的最大收回速度
+};
+enum MINE_TYPE
+{
+	GOLD,
+	MONEY,
+	STONE,
+	ZUAN,
+	GOLDpuse,
+	TONG,
+};
+void gameinit(int uio)//初始化信息
+{
+	initgraph(whight, high);//创建窗口
+	mciSendString("open ./music/sound.mp3", 0, 0, 0);
+	mciSendString("open ./music/sound2.mp3", 0, 0, 0);
+	mciSendString("play ./music/sound2.mp3", 0, 0, 0);
+	sole.uio = uio;
+	IMAGE a;
+	loadimage(&a, "./123/1.png", 1400, 800);
+	putimage(0, 0, &a);
+	getchar();//按enter开始
+	IMAGE p;
+	loadimage(&p, "./123/19.jpg", 1400, 800);
+	putimage(0, 0, &p);
+	Sleep(3000);
+	if (GetAsyncKeyState(VK_LEFT))//获取药水
+	{
+		sole.oo = 1;
+		sole.ooo = 1;
+	}
+	else if (GetAsyncKeyState(VK_RIGHT))//获取炸弹
+	{
+		sole.zha = 20;
+	}
+	//Sleep(3000);
+	//getchar();//按enter开始
+	IMAGE b;
+	loadimage(&b, "./123/3.jpg", 1400, 800);
+	putimage(0, 0, &b);
+	char arr[30] = { 0 };
+	sprintf(arr, "%d", sole.uio);
+	settextcolor(RGB(244, 226, 9));
+	settextstyle(68, 0, "HG創英角ﾎﾟｯﾌﾟ体");
+	setbkmode(TRANSPARENT);
+	outtextxy(800, 255, arr);
+	Sleep(3000);
+	for (int i = 0; i < images - 1; i++)
+	{
+		char tem[25];
+		sprintf(tem, "images/%d.jpg", i);
+		loadimage(&img[i], tem);
+	}
+	loadimage(&img[i_bk], "images/bk.png", whight, high - 120);
+	loadimage(&img[i_soledown - 1], "images/4.png", 140, 120);
+	loadimage(&img[i_soledown], "images/5.png", 140, 120);
+	loadimage(&img[i_soleup - 1], "images/6.png", 140, 120);
+	loadimage(&img[i_soleup], "images/7.png", 140, 120);
+	loadimage(&img[i_gold - 1], "images/0.png", 73, 62);
+	loadimage(&img[i_gold], "images/1.png", 73, 62);
+	loadimage(&img[i_gold1 - 1], "images/16.png", 133, 122);
+	loadimage(&img[i_gold1], "images/17.png", 133, 122);
+	loadimage(&img[i_money - 1], "images/2.png", 73, 62);
+	loadimage(&img[i_money], "images/3.png", 73, 62);
+	loadimage(&img[i_stone - 1], "images/8.png", 73, 62);
+	loadimage(&img[i_stone], "images/9.png", 73, 62);
+	loadimage(&img[i_go - 1], "./images/10.png", 73, 62);
+	loadimage(&img[i_go], "./images/11.png", 73, 62);
+	loadimage(&img[i_zuan - 1], "images/12.png", 53, 42);
+	loadimage(&img[i_zuan], "./images/13.png", 53, 42);
+	loadimage(&img[i_zha - 1], "./images/14.jpg", 47, 93);
+	loadimage(&img[i_zha], "./images/15.jpg", 47, 93);
+	loadimage(&img[i_tong-1], "./images/18.png", 147, 183);
+	loadimage(&img[i_tong], "./images/19.png", 147, 183);
+	//初始化角色信息
+	sole.wight = 140;
+	sole.hight = 120;
+	sole.x = whight / 2 - sole.wight / 2;
+	sole.y = 0;
+	sole.coin = 0;
+	//sole.zha = 999;
+	sole.un = 0;
+	sole.hp = 50;
+	//sole.ooo = 1;//药水最多携带1个
+	//sole.oo = 1;
+	//初始化物品信息
+	for (int i = 0; i < sum; i++)
+	{
+		int o = 0;
+		Mine[i].flag = true;
+		Mine[i].size = 60;
+		Mine[i].type = rand() % 6;
+	here:
+		if (Mine[i].type == TONG)
+		{
+			Mine[i].x = rand() % (whight - 147);
+		}
+		{
+			if (Mine[i].type == GOLDpuse)
+			{
+				Mine[i].x = rand() % (whight - 133);
+			}
+			else
+			{
+				Mine[i].x = rand() % (whight - 73);
+			}
+		}
+		Mine[i].y = rand() % (high - 150) + 120;
+		if (Mine[i].type == GOLDpuse)
+		{
+			while (Mine[i].y > 800 - 122)//纵向越界
+			{
+				Mine[i].y = rand() % (high - 150) + 120;
+			}
+		}
+		else if(Mine[i].type==GOLD|| Mine[i].type == MONEY|| Mine[i].type == STONE)
+		{
+			while (Mine[i].y > 800 - 62)//纵向越界
+			{
+				Mine[i].y = rand() % (high - 150) + 120;
+			}
+		}
+		else if (Mine[i].type == TONG)
+		{
+			while (Mine[i].y > 800 - 183)//纵向越界
+			{
+				Mine[i].y = rand() % (high - 150) + 120;
+			}
+		}
+		o = i;
+		if (i >= 1)
+		{
+			for (int u = 1; u <= i; u++)
+			{
+				if (Mine[i].x > Mine[o - 1].x - 147
+					&& Mine[i].x < Mine[o - 1].x &&
+					Mine[i].y >Mine[o - 1].y - 183 &&
+					Mine[i].y < Mine[o - 1].y)
+				{
+					goto here;
+				}
+				o--;
+			}
+		}
+	}
+	//初始化钩子
+	hook.x = sole.x + 40;
+	hook.y = sole.y + 100;
+	hook.len = 50;
+	hook.endx = hook.x;
+	hook.endy = hook.y + hook.len;
+	hook.angle = 0;
+	hook.dir = RIGHT;
+	hook.vx = 0;
+	hook.vy = 0;
+	hook.state = M_nomal;
+	hook.index = -1;
+	hook.qwe = 0;//判断绳子收缩速度
+}
+void gamedraw()//绘制背景
+{
+	putimage(0, 120, &img[i_bk]);
+	setfillcolor(RGB(255, 208, 52));
+	solidrectangle(0, 0, whight, 120);
+	//绘制角色
+
+		//putimage(sole.x, sole.y, &img[i_soledown - 1], SRCAND);
+		//putimage(sole.x, sole.y, &img[i_soledown], SRCPAINT);
+	putimage(sole.x, sole.y, &img[i_soleup - 1], SRCAND);
+	putimage(sole.x, sole.y, &img[i_soleup], SRCPAINT);
+	putimage(1150, 12, &img[i_zha - 1], SRCAND);
+	putimage(1150, 12, &img[i_zha], SRCPAINT);
+	//绘制分数
+	char score[30] = "";
+	sprintf(score, "金錢:%d", sole.coin);
+	settextcolor(RGB(151, 114, 0));
+	settextstyle(45, 0, "HG創英角ﾎﾟｯﾌﾟ体");
+	setbkmode(TRANSPARENT);
+	outtextxy(20, 10, score);
+	char score2[30] = "";
+	sprintf(score2, "目標:%d", sole.uio);
+	settextcolor(RGB(151, 114, 0));
+	settextstyle(45, 0, "HG創英角ﾎﾟｯﾌﾟ体");
+	setbkmode(TRANSPARENT);
+	outtextxy(20, 60, score2);
+	char zha[30] = "";
+	sprintf(zha, "炸弾:%d", sole.zha);
+	settextcolor(RGB(151, 114, 0));
+	settextstyle(50, 0, "HG創英角ﾎﾟｯﾌﾟ体");
+	setbkmode(TRANSPARENT);
+	outtextxy(1200, 20, zha);
+	char hp[30] = "";
+	sprintf(zha, "HP:%d", sole.hp);
+	settextcolor(RGB(151, 114, 0));
+	settextstyle(50, 0, "HG創英角ﾎﾟｯﾌﾟ体");
+	setbkmode(TRANSPARENT);
+	outtextxy(900,10, zha);
+	char ooo[30] = "";
+	if (GetAsyncKeyState(VK_SPACE)&&sole.oo>0)
+	{
+		sole.oo--;
+	}
+	sprintf(ooo, "薬水:%d", sole.oo);
+	settextcolor(RGB(151, 114, 0));
+	settextstyle(50, 0, "HG創英角ﾎﾟｯﾌﾟ体");
+	setbkmode(TRANSPARENT);
+	outtextxy(900, 70, ooo);
+
+	//绘制物品
+	for (int i = 0; i < sum; i++)
+	{
+		if (Mine[i].flag == true)
+		{
+			switch (Mine[i].type)
+			{
+			case GOLDpuse:
+				putimage(Mine[i].x, Mine[i].y, &img[i_gold1 - 1], SRCAND);
+				putimage(Mine[i].x, Mine[i].y, &img[i_gold1], SRCPAINT);
+				Mine[i].gold = 150;//金块价值
+				break;
+			case GOLD:
+				putimage(Mine[i].x, Mine[i].y, &img[i_gold - 1], SRCAND);
+				putimage(Mine[i].x, Mine[i].y, &img[i_gold], SRCPAINT);
+				Mine[i].gold = 60;//金块价值
+				break;
+			case MONEY:
+				putimage(Mine[i].x, Mine[i].y, &img[i_money - 1], SRCAND);
+				putimage(Mine[i].x, Mine[i].y, &img[i_money], SRCPAINT);
+				Mine[i].gold = rand() % 400 + 1;//钱袋价值
+				break;
+			case STONE:
+				putimage(Mine[i].x, Mine[i].y, &img[i_stone - 1], SRCAND);
+				putimage(Mine[i].x, Mine[i].y, &img[i_stone], SRCPAINT);
+				Mine[i].gold = 10;//石头价值
+				break;
+			case ZUAN:
+				putimage(Mine[i].x, Mine[i].y, &img[i_zuan - 1], SRCAND);
+				putimage(Mine[i].x, Mine[i].y, &img[i_zuan], SRCPAINT);
+				Mine[i].gold = 200;//钻石价值
+				break;
+			case TONG:
+				putimage(Mine[i].x, Mine[i].y, &img[i_tong - 1], SRCAND);
+				putimage(Mine[i].x, Mine[i].y, &img[i_tong], SRCPAINT);
+				Mine[i].gold = -200;//炸药桶价值
+				break;
+			}
+		}
+	}
+	//绘制钩子
+	setlinecolor(BROWN);
+	setlinestyle(PS_SOLID, 5);
+	line(hook.x, hook.y - 10, hook.endx, hook.endy - 10);//画线
+	//putimage(hook.endx-35, hook.endy-15, &img[i_go - 1], SRCAND);
+	//putimage(hook.endx-35, hook.endy-15, &img[i_go], SRCPAINT);
+}
+//钩子摆动
+void hookrock()
+{
+	if (hook.state == M_nomal)
+	{
+		if (hook.dir == RIGHT)
+		{
+			hook.angle++;
+		}
+		else
+		{
+			hook.angle--;
+		}
+		if (hook.angle > max_angle)
+		{
+			hook.dir = LEFT;
+		}
+		else if (hook.angle < -max_angle)
+		{
+			hook.dir = RIGHT;
+		}
+		//角度转弧度 ==>pi/180度*角度
+		hook.endx = hook.x + sin(PI / 180 * hook.angle) * hook.len;
+		hook.endy = hook.y + cos(PI / 180 * hook.angle) * hook.len;
+
+	}
+}
+//游戏控制
+void gamecomtrol(double speed)
+{
+	sole.p = 0;
+	if (sole.ooo > 0)
+	{
+		if (GetAsyncKeyState(VK_SPACE))
+		{
+  			sole.p++;
+		}
+	}
+	if (GetAsyncKeyState(VK_DOWN) && hook.state == M_nomal)
+	{
+		hook.vx = sin(PI / 180 * hook.angle) * speed;
+		hook.vy = cos(PI / 180 * hook.angle) * speed;
+		if (sole.p == 0)
+		{
+			hook.state = M_long;
+		}
+		else if (sole.p == 1)
+		{
+			hook.state = M_longD;
+		}
+		//mciSendString("play music/sound.mp3", 0, 0, 0);
+	}
+	//碰到边界返回
+	if (hook.endx<0 || hook.endx>whight || hook.endy > high)
+	{
+		hook.state = M_short;
+	}
+	if (hook.state == M_long)
+	{
+		hook.endx += hook.vx;
+		hook.endy += hook.vy;
+	}
+	else if (hook.state == M_longD)
+	{
+		int u = 50;
+		hook.vx = sin(PI / 180 * hook.angle) * u;
+		hook.vy = cos(PI / 180 * hook.angle) * u;
+		hook.endx += hook.vx;
+		hook.endy += hook.vy;
+	}
+	
+	else if (hook.state == M_short)
+	{
+		hook.endx -= hook.vx;
+		hook.endy -= hook.vy;
+		if (distance(hook) <= hook.len)
+		{
+			hook.state = M_nomal;
+		}
+	}
+	else if (hook.state == M_shortD)
+	{
+		int u = 5;
+		hook.vx = sin(PI / 180 * hook.angle) * u;
+		hook.vy = cos(PI / 180 * hook.angle) * u;
+		hook.endx -= hook.vx;
+		hook.endy -= hook.vy;
+		if (distance(hook) <= hook.len)
+		{
+			hook.state = M_nomal;
+		}
+	}
+	else if (hook.state == M_shortX)
+	{
+		int u = 8;
+		hook.vx = sin(PI / 180 * hook.angle) * u;
+		hook.vy = cos(PI / 180 * hook.angle) * u;
+		hook.endx -= hook.vx;
+		hook.endy -= hook.vy;
+		if (distance(hook) <= hook.len)
+		{
+			hook.state = M_nomal;
+		}
+
+	}
+	else if (hook.state == M_shortZ)
+	{
+		int u = 25;
+		hook.vx = sin(PI / 180 * hook.angle) * u;
+		hook.vy = cos(PI / 180 * hook.angle) * u;
+		hook.endx -= hook.vx;
+		hook.endy -= hook.vy;
+		if (distance(hook) <= hook.len)
+		{
+			hook.state = M_nomal;
+		}
+	}
+}
+void tyu()//当矿物勾完时，重新加载矿物
+{
+
+	for (int i = 0; i < sum; i++)
+	{
+		Mine[i].flag = true;
+		Mine[i].type = rand() % 5;
+		int o = 0;
+	here:
+		if (Mine[i].type == GOLDpuse)
+		{
+			Mine[i].x = rand() % (whight - 133);
+		}
+		else
+		{
+			Mine[i].x = rand() % (whight - 73);
+		}
+		Mine[i].y = rand() % (high - 150) + 122;
+		if (Mine[i].type == GOLDpuse)
+		{
+			while (Mine[i].y > 800 - 122)//纵向越界
+			{
+				Mine[i].y = rand() % (high - 150) + 120;
+			}
+		}
+		else
+		{
+			while (Mine[i].y > 800 - 62)//纵向越界
+			{
+				Mine[i].y = rand() % (high - 150) + 120;
+			}
+		}
+		o = i;
+		if (i >= 1)
+		{
+			for (int u = 1; u <= i; u++)
+			{
+				if (Mine[i].x > Mine[o - 1].x - 133
+					&& Mine[i].x < Mine[o - 1].x &&
+					Mine[i].y >Mine[o - 1].y - 122 &&
+					Mine[i].y < Mine[o - 1].y)
+				{
+					goto here;
+				}
+				o--;
+			}
+		}
+		switch (Mine[i].type)
+		{
+		case GOLDpuse:
+
+			putimage(Mine[i].x, Mine[i].y, &img[i_gold1 - 1], SRCAND);
+			putimage(Mine[i].x, Mine[i].y, &img[i_gold1], SRCPAINT);
+			//Mine[i].gold = 150;//金块价值
+			break;
+		case GOLD:
+
+			putimage(Mine[i].x, Mine[i].y, &img[i_gold - 1], SRCAND);
+			putimage(Mine[i].x, Mine[i].y, &img[i_gold], SRCPAINT);
+			//Mine[i].gold = 60;//金块价值
+			break;
+		case MONEY:
+
+			putimage(Mine[i].x, Mine[i].y, &img[i_money - 1], SRCAND);
+			putimage(Mine[i].x, Mine[i].y, &img[i_money], SRCPAINT);
+			//Mine[i].gold = rand() % 400 + 1;//钱袋价值
+			break;
+		case STONE:
+
+			putimage(Mine[i].x, Mine[i].y, &img[i_stone - 1], SRCAND);
+			putimage(Mine[i].x, Mine[i].y, &img[i_stone], SRCPAINT);
+			//Mine[i].gold = 10;//石头价值
+			break;
+		case ZUAN:
+
+			putimage(Mine[i].x, Mine[i].y, &img[i_zuan - 1], SRCAND);
+			putimage(Mine[i].x, Mine[i].y, &img[i_zuan], SRCPAINT);
+			//Mine[i].gold = 200;//钻石价值
+			break;
+		case TONG:
+			putimage(Mine[i].x, Mine[i].y, &img[i_tong - 1], SRCAND);
+			putimage(Mine[i].x, Mine[i].y, &img[i_tong], SRCPAINT);
+			break;
+		}
+	}
+}
+int judgegra()//判断抓取
+{
+	
+	int U = 0;//判断炸弹是否使用💣
+	int ret = 0;
+	//判断抓到哪个物品
+	for (int i = 0; i < sum; i++)
+	{
+		if (Mine[i].flag == true &&
+			hook.endx > Mine[i].x && hook.endx<Mine[i].x + 147 &&
+			hook.endy>Mine[i].y && hook.endy < Mine[i].y + 183)
+		{
+		if (Mine[i].type == TONG)//中型物体
+		{
+			ret = 147;
+			if (sole.ooo > 0)
+			{
+				if (GetAsyncKeyState(VK_SPACE))
+				{
+					hook.index = i;
+					goto where;
+				}
+			}
+			hook.qwe = 2;
+			if (GetAsyncKeyState(VK_UP))
+			{
+				if (sole.zha > 0)
+				{
+					sole.un++;
+					Mine[i].flag = false;
+					sole.zha--;
+					sole.coin += Mine[hook.index].gold;
+					break;
+				}
+			}
+			hook.index = i;
+			goto here;
+		}
+        }
+		if (Mine[i].flag == true &&
+			hook.endx > Mine[i].x && hook.endx<Mine[i].x + 53 &&
+			hook.endy>Mine[i].y && hook.endy < Mine[i].y + 42 || Mine[i].flag == true &&
+			hook.endx > Mine[i].x && hook.endx<Mine[i].x + 73 &&
+			hook.endy>Mine[i].y && hook.endy < Mine[i].y + 62 || Mine[i].flag == true &&
+			hook.endx > Mine[i].x && hook.endx<Mine[i].x + 133 &&
+			hook.endy>Mine[i].y && hook.endy < Mine[i].y + 122)
+		{
+			if (Mine[i].type == GOLDpuse)
+			{
+				ret = 133;
+				if (sole.ooo > 0)
+				{
+					if (GetAsyncKeyState(VK_SPACE))
+					{
+						hook.index = i;
+						goto where;
+					}
+				}
+				hook.qwe = 0;
+				if (GetAsyncKeyState(VK_UP))
+				{
+					if (sole.zha > 0)
+					{
+						
+						hook.qwe++;
+						sole.un++;
+						Mine[i].flag = false;
+						sole.zha--;
+						sole.coin += Mine[hook.index].gold;
+						break;
+					}
+				}
+				hook.index = i;
+				goto here;
+			}
+			else if (Mine[i].type == GOLD || Mine[i].type == MONEY || Mine[i].type == STONE)
+			{
+				ret = 73;
+				if (sole.ooo > 0)
+				{
+					if (GetAsyncKeyState(VK_SPACE))
+					{
+						hook.index = i;
+						goto where;
+					}
+				}
+				hook.qwe = 2;
+				if (GetAsyncKeyState(VK_UP))
+				{
+					if (sole.zha > 0)
+					{
+						
+						sole.un++;
+						Mine[i].flag = false;
+						sole.zha--;
+						sole.coin += Mine[hook.index].gold;
+						break;
+					}
+				}
+				hook.index = i;
+				goto here;
+			}
+			else if (Mine[i].type == ZUAN)
+			{
+				ret = 53;
+				if (sole.ooo > 0)
+				{
+					if (GetAsyncKeyState(VK_SPACE))
+					{
+						hook.index = i;
+						goto where;
+					}
+				}
+				hook.qwe = 1;
+				if (GetAsyncKeyState(VK_UP))
+				{
+					if (sole.zha > 0)
+					{
+						
+						sole.un++;
+						Mine[i].flag = false;
+						sole.zha--;
+						sole.coin += Mine[hook.index].gold;
+						break;
+					}
+				}
+				hook.index = i;
+				goto here;
+			}
+		}
+	}
+	U++;
+here:
+	if (hook.index != -1)
+	{
+
+		if (hook.qwe == 0)
+		{
+			hook.state = M_shortD;
+		}
+		else if (hook.qwe == 1)
+		{
+			hook.state = M_short;
+		}
+		else if (hook.qwe == 2)
+		{
+			hook.state = M_shortX;
+		}
+		if (U == 1)
+		{
+			where:
+			hook.state = M_shortZ;
+		}
+		if (ret == 133)
+		{
+			Mine[hook.index].x = hook.endx - 133 / 2;
+			Mine[hook.index].y = hook.endy - 122 / 2;
+		}
+		else if (ret == 73)
+		{
+			Mine[hook.index].x = hook.endx - 73 / 2;
+			Mine[hook.index].y = hook.endy - 62 / 2;
+		}
+		else if (ret == 53)
+		{
+			Mine[hook.index].x = hook.endx - 53 / 2;
+			Mine[hook.index].y = hook.endy - 42 / 2;
+		}
+		else if (ret == 147)
+		{
+			Mine[hook.index].x = hook.endx - 147 / 2;
+			Mine[hook.index].y = hook.endy - 183 / 2;
+		}
+		//缩短完成
+		if (distance(hook)<= hook.len + 30)
+		{
+			if (sole.un == 0)
+			{
+				Mine[hook.index].flag = false;//物品不存在
+				if (Mine[hook.index].type == TONG)
+				{
+					if (sole.coin > 0)
+					{
+						sole.coin += Mine[hook.index].gold;
+						if (sole.coin < 0)
+						{
+							sole.coin = 0;
+						}
+					}
+				}
+				else
+				{
+					sole.coin += Mine[hook.index].gold;
+				}
+				if (Mine[hook.index].type == TONG)//收回炸药减生命
+				{
+					sole.hp--;
+				}
+			}
+			sole.un = 0;//初始化0，(没用炸弹的状态了炸弹)否为0，是为1.
+			hook.state = M_nomal;//绳子状态为原长
+			hook.index = -1;
+		}
+	}
+	
+	int y = 0;
+	for (int i = 0; i < sum; i++)
+	{
+		if (Mine[i].flag == false)
+		{
+			y++;
+			if (y == sum)
+			{
+				tyu();
+			}
+		}
+	}
+	return sole.coin;
+	//如果抓到了
+}
+int main()
+{
+
+	srand((unsigned int)time(NULL));
+	int uio =rand()%2000+1+2000;
+	int ret = 0;
+	gameinit(uio);
+	DWORD t1, t2;
+	t1 = t2 = GetTickCount();
+	BeginBatchDraw();
+	int i = 0;
+
+	while (1)
+	{
+		if (t2 - t1 > 21)
+		{
+		
+			hookrock();
+			gamecomtrol(20);
+			t1 = t2;
+		}
+		t2 = GetTickCount();
+		gamedraw();
+		if (ret >= uio)
+		{
+			IMAGE a;
+			loadimage(&a, "./123/2.jpg", 1400, 800);
+			putimage(0, 0, &a);
+			char arr[30] = { 0 };
+			i = sole.coin;
+			sprintf(arr, "分数:%d", i);
+			settextcolor(RGB(244, 226, 9));
+			settextstyle(68, 0, "HG創英角ﾎﾟｯﾌﾟ体");
+			setbkmode(TRANSPARENT);
+			outtextxy(550, 465, arr);
+		}
+		if (sole.hp == 0)
+		{
+			IMAGE z;
+			loadimage(&z, "./123/4.jpg", 1400, 800);
+			putimage(0, 0, &z);
+		}
+		FlushBatchDraw();
+		ret = judgegra();
+	}
+	return 0;
+}
+int distance(Hook hook)
+{
+	int dis = sqrt((float)(hook.x - hook.endx) * (hook.x - hook.endx) + (hook.y - hook.endy) * (hook.y - hook.endy));
+	return dis;
+}
